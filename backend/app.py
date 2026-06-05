@@ -18,6 +18,9 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
+    print("DATABASE_PUBLIC_URL =", os.getenv("DATABASE_PUBLIC_URL"))
+    print("JWT_SECRET_KEY =", os.getenv("JWT_SECRET_KEY"))
+
     db.init_app(app)
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
