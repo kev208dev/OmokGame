@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
@@ -10,7 +11,7 @@ from routes.game import game_bp
 def create_app():
     app = Flask(__name__)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_PUBLIC_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = "change later"
 
