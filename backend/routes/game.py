@@ -1,8 +1,8 @@
 from flask_socketio import emit, join_room, leave_room
 from flask_jwt_extended import decode_token
 from flask import Blueprint, request
-from extensions import socketio, db
-from models import User
+from Omok.backend.extensions import socketio, db
+from Omok.backend.models import User
 
 game_bp = Blueprint("game", __name__)
 

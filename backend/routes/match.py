@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 from flask_socketio import emit
-from extensions import socketio, db
-from models import User
-from routes.game import connected_users
+from Omok.backend.extensions import socketio, db
+from Omok.backend.models import User
+from Omok.backend.routes.game import connected_users
 
 import uuid
 

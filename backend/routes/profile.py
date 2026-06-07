@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from models import User
+from Omok.backend.models import User
 
 profile_bp = Blueprint("profile", __name__)
 
