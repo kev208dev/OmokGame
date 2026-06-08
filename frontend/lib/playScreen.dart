@@ -179,8 +179,6 @@ class PlayScreenState extends State<PlayScreen> {
             children: [
               ElevatedButton(onPressed: resign, child: const Text('기권')),
               ElevatedButton(onPressed: () {}, child: const Text('설정')),
-              ElevatedButton(onPressed: () {}, child: const Text('채팅')),
-              ElevatedButton(onPressed: () {}, child: const Text('기보')),
             ],
           ),
         ],
