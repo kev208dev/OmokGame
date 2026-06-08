@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'playScreen.dart';
+import 'auth_screen.dart';
+import 'socket_service.dart';
+import 'api_service.dart';
 
 void main() {
-  runApp(MaterialApp(home: OmokGame()));
+  runApp(const MaterialApp(home: AuthScreen()));
 }
 
 class OmokGame extends StatelessWidget {
@@ -22,7 +25,7 @@ class OmokGame extends StatelessWidget {
                   children: [
                     Icon(Icons.account_circle, size: 30),
                     Text(
-                      'Player1',
+                      ApiService.username ?? 'Player1',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -39,10 +42,28 @@ class OmokGame extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-              
-                    MaterialPageRoute(builder: (context) => PlayScreen()),
+                  final sock = SocketService.instance;
+                  sock.connect(
+                    onConnect: () {
+                      sock.requestMatch((data) {
+                        if (!context.mounted) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlayScreen(matchData: data),
+                          ),
+                        );
+                      });
+                    },
+                    onError: (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('연결 실패: $e')),
+                      );
+                    },
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('상대 찾는 중...')),
                   );
                 },
                 style: ElevatedButton.styleFrom(
