@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'drawingBoard.dart';
 import 'socket_service.dart';
+import 'api_service.dart';
 
-const int kBoardSize = 9;
-const double kBoardPx = 270;
+const int kBoardSize = 19;
 
 class PlayScreen extends StatefulWidget {
   final dynamic matchData;
@@ -22,6 +22,14 @@ class PlayScreenState extends State<PlayScreen> {
   bool gameOver = false;
 
   String? get roomId => widget.matchData?['roomid'] as String?;
+
+  String get opponentName {
+    final me = ApiService.username ?? '';
+    final p1 = widget.matchData?['player1name'] as String? ?? '';
+    final p2 = widget.matchData?['player2name'] as String? ?? '';
+    if (p1 == me) return p2.isEmpty ? '상대' : p2;
+    return p1.isEmpty ? '상대' : p1;
+  }
 
   @override
   void initState() {
@@ -61,13 +69,13 @@ class PlayScreenState extends State<PlayScreen> {
     });
   }
 
-  void onTapBoard(Offset local) {
+  void onTapBoard(Offset local, double boardPx) {
     if (gameOver || myColor == null) return;
     if (turn != myColor) {
       snack('상대 차례입니다.');
       return;
     }
-    final gap = kBoardPx / (kBoardSize - 1);
+    final gap = boardPx / (kBoardSize - 1);
     final x = (local.dx / gap).round().clamp(0, kBoardSize - 1);
     final y = (local.dy / gap).round().clamp(0, kBoardSize - 1);
     if (board[y][x] != null) return;
@@ -103,62 +111,76 @@ class PlayScreenState extends State<PlayScreen> {
   void snack(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
+  Widget playerChip(String color) {
+    final isMe = myColor == color;
+    final name = isMe ? (ApiService.username ?? '나') : opponentName;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.circle,
+          color: color == 'black' ? Colors.black : Colors.white,
+          size: 26,
+          shadows: color == 'white'
+              ? [const Shadow(color: Colors.black54, blurRadius: 2)]
+              : null,
+        ),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            if (isMe)
+              const Text('나', style: TextStyle(fontSize: 11, color: Colors.blue)),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('온라인 대국'), centerTitle: true),
+      appBar: AppBar(title: const Text('온라인 대국'), centerTitle: true),
       body: Column(
         children: [
-          SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.circle, color: Colors.black, size: 30),
-                  Text('흑', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
-                  SizedBox(width: 10),
-                  Text('YOU', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300)),
-                ],
-              ),
-              Text(
-                '1:30',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  ),
-              ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.circle,
-                    color: Colors.white,
-                    size: 30,
-                    shadows: [Shadow(color: Colors.black, blurRadius: 1)],
-                  ),
-                  Text('백', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
-                  SizedBox(width: 10),
-                  Text('오목의 신', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300)),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          GestureDetector(
-            onTapDown: (d) => onTapBoard(d.localPosition),
-            child: CustomPaint(
-              size: Size(kBoardPx, kBoardPx),
-              painter: BoardPainter(stones: board),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                playerChip('black'),
+                const Text('VS', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey)),
+                playerChip('white'),
+              ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final boardPx = constraints.maxWidth;
+                return GestureDetector(
+                  onTapDown: (d) => onTapBoard(d.localPosition, boardPx),
+                  child: CustomPaint(
+                    size: Size(boardPx, boardPx),
+                    painter: BoardPainter(stones: board, boardSize: kBoardSize),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              ElevatedButton(child: Text('기권'), onPressed: resign),
-              ElevatedButton(child: Text('설정'), onPressed: () {}),
-              ElevatedButton(child: Text('채팅'), onPressed: () {}),
-              ElevatedButton(child: Text('기보'), onPressed: () {}),
+              ElevatedButton(onPressed: resign, child: const Text('기권')),
+              ElevatedButton(onPressed: () {}, child: const Text('설정')),
+              ElevatedButton(onPressed: () {}, child: const Text('채팅')),
+              ElevatedButton(onPressed: () {}, child: const Text('기보')),
             ],
           ),
         ],

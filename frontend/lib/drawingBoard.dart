@@ -2,35 +2,25 @@ import 'package:flutter/material.dart';
 
 class BoardPainter extends CustomPainter {
   final List<List<String?>>? stones;
-  BoardPainter({this.stones});
+  final int boardSize;
+  BoardPainter({this.stones, this.boardSize = 19});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 1;
+      ..strokeWidth = 0.8;
 
-    double gap = size.width / 8;
+    final gap = size.width / (boardSize - 1);
 
-    for (int i = 0; i < 9; i++) {
-      // 가로
-      canvas.drawLine(
-        Offset(0, gap * i),
-        Offset(size.width, gap * i),
-        paint,
-      );
-
-      // 세로
-      canvas.drawLine(
-        Offset(gap * i, 0),
-        Offset(gap * i, size.height),
-        paint,
-      );
+    for (int i = 0; i < boardSize; i++) {
+      canvas.drawLine(Offset(0, gap * i), Offset(size.width, gap * i), paint);
+      canvas.drawLine(Offset(gap * i, 0), Offset(gap * i, size.height), paint);
     }
 
     final s = stones;
     if (s != null) {
-      final r = gap * 0.4;
+      final r = gap * 0.42;
       for (int y = 0; y < s.length; y++) {
         for (int x = 0; x < s[y].length; x++) {
           final c = s[y][x];
@@ -41,16 +31,14 @@ class BoardPainter extends CustomPainter {
             r,
             Paint()..color = c == 'black' ? Colors.black : Colors.white,
           );
-          if (c == 'white') {
-            canvas.drawCircle(
-              center,
-              r,
-              Paint()
-                ..color = Colors.black
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 1,
-            );
-          }
+          canvas.drawCircle(
+            center,
+            r,
+            Paint()
+              ..color = Colors.black
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = c == 'white' ? 1.2 : 0,
+          );
         }
       }
     }
