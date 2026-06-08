@@ -42,7 +42,6 @@ class OmokGame extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // 소켓 연결 후 매칭 요청. 매칭되면 대국 화면으로 이동.
                   final sock = SocketService.instance;
                   sock.connect(
                     onConnect: () {
