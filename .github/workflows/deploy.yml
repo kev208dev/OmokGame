@@ -30,11 +30,7 @@ jobs:
 
       - run: flutter pub get
 
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      - run: flutter build web --release --base-href /Omok/
+      - run: flutter build web --release --base-href /OmokGame/
 
       - uses: actions/upload-pages-artifact@v3
         with:
