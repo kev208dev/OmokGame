@@ -34,10 +34,7 @@ def handle_request_match():
         emit("message", "이미 대기열에 있습니다.")
         return
 
-    match_queue.append({
-        "userid": userid,
-        "sid": current_sid
-    })
+    match_queue.append({"userid": userid, "sid": current_sid})
 
     print(
         f"[소켓 대기열 진입] "
@@ -47,7 +44,6 @@ def handle_request_match():
     )
 
     if len(match_queue) >= 2:
-
         player1 = match_queue.pop(0)
         player2 = match_queue.pop(0)
 
@@ -55,18 +51,9 @@ def handle_request_match():
         p2_user = db.session.get(User, player2["userid"])
 
         if not p1_user or not p2_user:
+            emit("error", "유저 정보를 조회할 수 없습니다.", to=player1["sid"])
 
-            emit(
-                "error",
-                "유저 정보를 조회할 수 없습니다.",
-                to=player1["sid"]
-            )
-
-            emit(
-                "error",
-                "유저 정보를 조회할 수 없습니다.",
-                to=player2["sid"]
-            )
+            emit("error", "유저 정보를 조회할 수 없습니다.", to=player2["sid"])
 
             return
 
@@ -81,25 +68,15 @@ def handle_request_match():
 
         match_data = {
             "roomid": roomid,
-
             "player1id": int(p1_user.id),
             "player2id": int(p2_user.id),
-
             "player1name": p1_user.username,
             "player2name": p2_user.username,
         }
 
-        socketio.emit(
-            "match_complete",
-            match_data,
-            to=player1["sid"]
-        )
+        socketio.emit("match_complete", match_data, to=player1["sid"])
 
-        socketio.emit(
-            "match_complete",
-            match_data,
-            to=player2["sid"]
-        )
+        socketio.emit("match_complete", match_data, to=player2["sid"])
 
 
 @match_bp.route("/room/<room_id>", methods=["GET"], strict_slashes=False)
@@ -108,8 +85,6 @@ def get_room(room_id):
     room = rooms.get(room_id)
 
     if not room:
-        return {
-            "message": "방 없음"
-        }, 404
+        return {"message": "방 없음"}, 404
 
     return room, 200

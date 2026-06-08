@@ -43,29 +43,17 @@ def handle_disconnect():
 
 def create_room(room_id):
     games[room_id] = {
-        "players": {
-            "black": None,
-            "white": None
-        },
-
-        "user_ids": {
-            "black": None,
-            "white": None
-        },
-
+        "players": {"black": None, "white": None},
+        "user_ids": {"black": None, "white": None},
         "board": [[None] * BOARD_SIZE for _ in range(BOARD_SIZE)],
-
-        "turn": "black"
+        "turn": "black",
     }
 
 
 def isFull(room_id):
     players = games[room_id]["players"]
 
-    return (
-        players["black"] is not None and
-        players["white"] is not None
-    )
+    return players["black"] is not None and players["white"] is not None
 
 
 def isPlayerAgain(room_id, sid):
@@ -114,9 +102,7 @@ def handle_join(data):
 
     join_room(room_id)
 
-    emit("joined", {
-        "color": color
-    })
+    emit("joined", {"color": color})
 
     emit("message", f"{color} joined", room=room_id)
 
@@ -134,12 +120,7 @@ def isInBoard(x, y):
 
 
 def check_winner(board, x, y, color):
-    directions = [
-        (1, 0),
-        (0, 1),
-        (1, 1),
-        (1, -1)
-    ]
+    directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
 
     for dx, dy in directions:
         count = 1
@@ -207,18 +188,9 @@ def handle_chaksoo(data):
 
     board[y][x] = color
 
-    emit(
-        "chaksooed",
-        {
-            "x": x,
-            "y": y,
-            "color": color
-        },
-        room=room_id
-    )
+    emit("chaksooed", {"x": x, "y": y, "color": color}, room=room_id)
 
     if check_winner(board, x, y, color):
-
         user_ids = games[room_id]["user_ids"]
 
         winner_id = user_ids[color]
@@ -229,21 +201,13 @@ def handle_chaksoo(data):
         addWin(winner_id)
         addLoss(loser_id)
 
-        emit(
-            "game_over",
-            {
-                "winner": color
-            },
-            room=room_id
-        )
+        emit("game_over", {"winner": color}, room=room_id)
 
         del games[room_id]
 
         return
 
-    games[room_id]["turn"] = (
-        "white" if color == "black" else "black"
-    )
+    games[room_id]["turn"] = "white" if color == "black" else "black"
 
 
 @socketio.on("resign")
@@ -270,21 +234,9 @@ def handle_resign(data):
     loser_sid = players[loser_color]
     winner_sid = players[winner_color]
 
-    emit(
-        "resigned",
-        {
-            "result": "lose"
-        },
-        to=loser_sid
-    )
+    emit("resigned", {"result": "lose"}, to=loser_sid)
 
-    emit(
-        "resigned",
-        {
-            "result": "win"
-        },
-        to=winner_sid
-    )
+    emit("resigned", {"result": "win"}, to=winner_sid)
 
     del games[room_id]
 

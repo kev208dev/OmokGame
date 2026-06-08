@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
@@ -8,6 +8,7 @@ from routes.auth import auth_bp
 from routes.profile import profile_bp
 from routes.match import match_bp
 from routes.game import game_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -35,7 +36,7 @@ def create_app():
         db.create_all()
 
     @app.route("/")
-    def home(): 
+    def home():
         return {"status": "alive"}
 
     return app

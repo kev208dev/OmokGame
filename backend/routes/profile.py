@@ -15,9 +15,11 @@ def profile():
     if not user:
         return jsonify({"message": "유저를 찾을 수 없습니다."}), 404
 
-    return jsonify({
-        "username": user.username,
-        "id": user_id,
-        "wins": user.wins,
-        "losses": user.losses
-    }), 200
+    return jsonify(
+        {
+            "username": user.username,
+            "id": user_id,
+            "wins": user.wins,
+            "losses": user.losses,
+        }
+    ), 200
