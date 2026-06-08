@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class BoardPainter extends CustomPainter {
-  /// board[y][x] = "black" | "white" | null. null 이면 빈 보드.
   final List<List<String?>>? stones;
   BoardPainter({this.stones});
 
@@ -29,7 +28,6 @@ class BoardPainter extends CustomPainter {
       );
     }
 
-    // 착수된 돌 그리기 (교차점 위)
     final s = stones;
     if (s != null) {
       final r = gap * 0.4;

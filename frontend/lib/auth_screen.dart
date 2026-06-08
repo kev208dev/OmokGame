@@ -2,32 +2,31 @@ import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'main.dart';
 
-/// 로그인 / 회원가입 화면. 로그인 성공 시 OmokGame 으로 이동.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<AuthScreen> createState() => AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
-  final _idCtrl = TextEditingController();
-  final _pwCtrl = TextEditingController();
-  bool _loading = false;
+class AuthScreenState extends State<AuthScreen> {
+  final idCtrl = TextEditingController();
+  final pwCtrl = TextEditingController();
+  bool loading = false;
 
-  Future<void> _submit(bool isLogin) async {
-    final id = _idCtrl.text.trim();
-    final pw = _pwCtrl.text.trim();
+  Future<void> submit(bool isLogin) async {
+    final id = idCtrl.text.trim();
+    final pw = pwCtrl.text.trim();
     if (id.isEmpty || pw.isEmpty) {
-      _toast('아이디와 비밀번호를 입력하세요.');
+      toast('아이디와 비밀번호를 입력하세요.');
       return;
     }
-    setState(() => _loading = true);
+    setState(() => loading = true);
     final (ok, msg) = isLogin
         ? await ApiService.login(id, pw)
         : await ApiService.register(id, pw);
     if (!mounted) return;
-    setState(() => _loading = false);
-    _toast(msg);
+    setState(() => loading = false);
+    toast(msg);
     if (ok && isLogin) {
       Navigator.pushReplacement(
         context,
@@ -36,7 +35,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  void _toast(String m) =>
+  void toast(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   @override
@@ -51,33 +50,33 @@ class _AuthScreenState extends State<AuthScreen> {
                 style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
             const SizedBox(height: 40),
             TextField(
-              controller: _idCtrl,
+              controller: idCtrl,
               decoration: const InputDecoration(
                   labelText: '아이디', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: _pwCtrl,
+              controller: pwCtrl,
               obscureText: true,
               decoration: const InputDecoration(
                   labelText: '비밀번호', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 24),
-            if (_loading)
+            if (loading)
               const CircularProgressIndicator()
             else
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => _submit(true),
+                      onPressed: () => submit(true),
                       child: const Text('로그인'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => _submit(false),
+                      onPressed: () => submit(false),
                       child: const Text('회원가입'),
                     ),
                   ),
@@ -91,8 +90,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
-    _idCtrl.dispose();
-    _pwCtrl.dispose();
+    idCtrl.dispose();
+    pwCtrl.dispose();
     super.dispose();
   }
 }

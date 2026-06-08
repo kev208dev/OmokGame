@@ -2,94 +2,87 @@ import 'package:flutter/material.dart';
 import 'drawingBoard.dart';
 import 'socket_service.dart';
 
-const int kBoardSize = 9; // 백엔드 BOARD_SIZE 와 동일
-const double kBoardPx = 270; // 보드 픽셀 크기 (디자인 유지)
+const int kBoardSize = 9;
+const double kBoardPx = 270;
 
 class PlayScreen extends StatefulWidget {
-  /// match_complete payload: {roomid, player1id, player2id, player1name, player2name}
   final dynamic matchData;
   const PlayScreen({super.key, this.matchData});
 
   @override
-  State<PlayScreen> createState() => _PlayScreenState();
+  State<PlayScreen> createState() => PlayScreenState();
 }
 
-class _PlayScreenState extends State<PlayScreen> {
-  final _sock = SocketService.instance;
+class PlayScreenState extends State<PlayScreen> {
+  final sock = SocketService.instance;
 
-  // board[y][x] = "black" | "white" | null
-  late List<List<String?>> _board;
-  String _turn = 'black'; // 흑 선
-  String? _myColor; // joined 이벤트로 결정
-  bool _gameOver = false;
+  late List<List<String?>> board;
+  String turn = 'black';
+  String? myColor;
+  bool gameOver = false;
 
-  String? get _roomId => widget.matchData?['roomid'] as String?;
+  String? get roomId => widget.matchData?['roomid'] as String?;
 
   @override
   void initState() {
     super.initState();
-    _board = List.generate(kBoardSize, (_) => List.filled(kBoardSize, null));
-    _bindSocket();
+    board = List.generate(kBoardSize, (_) => List.filled(kBoardSize, null));
+    bindSocket();
   }
 
-  void _bindSocket() {
-    final room = _roomId;
+  void bindSocket() {
+    final room = roomId;
     if (room == null) return;
 
-    // 상대/내 착수 수신
-    _sock.onChaksooed((data) {
+    sock.onChaksooed((data) {
       final x = data['x'] as int;
       final y = data['y'] as int;
       final color = data['color'] as String;
       if (!mounted) return;
       setState(() {
-        _board[y][x] = color;
-        _turn = color == 'black' ? 'white' : 'black';
+        board[y][x] = color;
+        turn = color == 'black' ? 'white' : 'black';
       });
     });
 
-    // 승패
-    _sock.onGameOver((data) {
+    sock.onGameOver((data) {
       final winner = data['winner'] as String;
-      _finish(winner == _myColor ? '승리!' : '패배');
+      finish(winner == myColor ? '승리!' : '패배');
     });
 
-    // 기권 결과
-    _sock.onResigned((data) {
+    sock.onResigned((data) {
       final result = data['result'] as String;
-      _finish(result == 'win' ? '승리! (상대 기권)' : '패배 (기권)');
+      finish(result == 'win' ? '승리! (상대 기권)' : '패배 (기권)');
     });
 
-    // 방 입장 → 내 돌 색 수신
-    _sock.join(room, (data) {
+    sock.join(room, (data) {
       if (!mounted) return;
-      setState(() => _myColor = data['color'] as String);
+      setState(() => myColor = data['color'] as String);
     });
   }
 
-  void _onTapBoard(Offset local) {
-    if (_gameOver || _myColor == null) return;
-    if (_turn != _myColor) {
-      _snack('상대 차례입니다.');
+  void onTapBoard(Offset local) {
+    if (gameOver || myColor == null) return;
+    if (turn != myColor) {
+      snack('상대 차례입니다.');
       return;
     }
     final gap = kBoardPx / (kBoardSize - 1);
     final x = (local.dx / gap).round().clamp(0, kBoardSize - 1);
     final y = (local.dy / gap).round().clamp(0, kBoardSize - 1);
-    if (_board[y][x] != null) return; // 이미 둔 자리
+    if (board[y][x] != null) return;
 
-    // 서버가 검증/브로드캐스트 → chaksooed 로 보드 갱신
-    _sock.chaksoo(_roomId!, x, y, _myColor!);
+    sock.chaksoo(roomId!, x, y, myColor!);
   }
 
-  void _resign() {
-    if (_gameOver || _myColor == null || _roomId == null) return;
-    _sock.resign(_roomId!, _myColor!);
+  void resign() {
+    if (gameOver || myColor == null || roomId == null) return;
+    sock.resign(roomId!, myColor!);
   }
 
-  void _finish(String msg) {
-    if (!mounted || _gameOver) return;
-    setState(() => _gameOver = true);
+  void finish(String msg) {
+    if (!mounted || gameOver) return;
+    setState(() => gameOver = true);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -97,8 +90,8 @@ class _PlayScreenState extends State<PlayScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // dialog
-              Navigator.pop(context); // back to home
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             child: const Text('확인'),
           ),
@@ -107,7 +100,7 @@ class _PlayScreenState extends State<PlayScreen> {
     );
   }
 
-  void _snack(String m) =>
+  void snack(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   @override
@@ -152,17 +145,17 @@ class _PlayScreenState extends State<PlayScreen> {
           ),
           SizedBox(height: 20),
           GestureDetector(
-            onTapDown: (d) => _onTapBoard(d.localPosition),
+            onTapDown: (d) => onTapBoard(d.localPosition),
             child: CustomPaint(
               size: Size(kBoardPx, kBoardPx),
-              painter: BoardPainter(stones: _board),
+              painter: BoardPainter(stones: board),
             ),
           ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              ElevatedButton(child: Text('기권'), onPressed: _resign),
+              ElevatedButton(child: Text('기권'), onPressed: resign),
               ElevatedButton(child: Text('설정'), onPressed: () {}),
               ElevatedButton(child: Text('채팅'), onPressed: () {}),
               ElevatedButton(child: Text('기보'), onPressed: () {}),
