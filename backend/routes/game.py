@@ -9,7 +9,7 @@ game_bp = Blueprint("game", __name__)
 games = {}
 connected_users = {}
 
-BOARD_SIZE = 9
+BOARD_SIZE = 19
 
 
 @socketio.on("connect")

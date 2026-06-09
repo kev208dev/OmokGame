@@ -3,6 +3,7 @@ from flask_socketio import emit
 from extensions import socketio, db
 from models import User
 from routes.game import connected_users
+import time
 
 import uuid
 
@@ -34,7 +35,7 @@ def handle_request_match():
         emit("message", "이미 대기열에 있습니다.")
         return
 
-    match_queue.append({"userid": userid, "sid": current_sid})
+    match_queue.append({"userid": userid, "sid": current_sid, "startTime": time.time()})
 
     print(
         f"[소켓 대기열 진입] "
@@ -42,6 +43,8 @@ def handle_request_match():
         f"소켓ID: {current_sid} | "
         f"현재 큐 인원: {len(match_queue)}명"
     )
+    if match_queue[0].get("startTime") - time.time() >= 3:
+        print("3초 경과")
 
     if len(match_queue) >= 2:
         player1 = match_queue.pop(0)
