@@ -24,10 +24,11 @@ def handle_connect(auth):
         decoded = decode_token(token)
 
         user_id = int(decoded["sub"])
+        user = db.session.get(User, user_id)
 
         connected_users[request.sid] = user_id
 
-        print(f"Connected: {user_id}")
+        print(f"Connected: {user_id}, {user.username}")
 
     except Exception as e:
         print(f"Connect rejected: {e}")
