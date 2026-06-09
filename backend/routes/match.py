@@ -34,7 +34,7 @@ def handle_request_match():
         emit("message", "이미 대기열에 있습니다.")
         return
 
-    match_queue.append({"userid": userid, "sid": current_sid})
+    match_queue.append({"userid": userid, "sid": current_sid, "startTime": time.time()})
 
     print(
         f"[소켓 대기열 진입] "

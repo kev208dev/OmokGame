@@ -35,7 +35,7 @@ def handle_connect(auth):
 
 
 @socketio.on("disconnect")
-def handle_disconnect():
+def handle_disconnect(reason=None):
     print(f"Disconnected: {request.sid}, {connected_users.get(request.sid)}")
     connected_users.pop(request.sid, None)
 
