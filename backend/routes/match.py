@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_socketio import emit
 from extensions import socketio, db
 from models import User
-from game import connected_users
+from routes.game import connected_users
 import uuid
 import time
 
