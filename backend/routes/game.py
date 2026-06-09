@@ -1,4 +1,4 @@
-from flask_socketio import emit, join_room, leave_room
+from flask_socketio import emit, join_room
 from flask_jwt_extended import decode_token
 from flask import Blueprint, request
 from extensions import socketio, db
@@ -36,9 +36,8 @@ def handle_connect(auth):
 
 @socketio.on("disconnect")
 def handle_disconnect():
+    print(f"Disconnected: {request.sid}, {connected_users.get(request.sid)}")
     connected_users.pop(request.sid, None)
-
-    print(f"Disconnected: {request.sid}, {connected_users[request.sid]}")
 
 
 def create_room(room_id):
