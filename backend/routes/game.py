@@ -38,7 +38,7 @@ def handle_connect(auth):
 def handle_disconnect():
     connected_users.pop(request.sid, None)
 
-    print(f"Disconnected: {request.sid}")
+    print(f"Disconnected: {request.sid}, {connected_users[request.sid]}")
 
 
 def create_room(room_id):
