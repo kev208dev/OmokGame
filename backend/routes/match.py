@@ -5,6 +5,7 @@ from models import User
 from routes.game import connected_users
 import uuid
 import time
+from threading import Timer
 
 match_bp = Blueprint("match", __name__)
 
@@ -12,6 +13,12 @@ match_queue = []
 
 rooms = {}
 
+def timeout_match(sid):
+    for player in match_queue[:]:
+        if player["sid"] == sid:
+            match_queue.remove(player)
+            print(f"{sid} 매칭 시간 초과")
+            break
 
 @socketio.on("request_match")
 def handle_request_match():
@@ -42,9 +49,7 @@ def handle_request_match():
         f"소켓ID: {current_sid} | "
         f"현재 큐 인원: {len(match_queue)}명"
     )
-    
-    if match_queue[0].get("startTime") - time.time() >= 3:
-        print("3초 경과")
+    Timer(3, timeout_match, args=[current_sid]).start()
 
     if len(match_queue) >= 2:
         player1 = match_queue.pop(0)
