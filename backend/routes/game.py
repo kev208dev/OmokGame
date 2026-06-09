@@ -234,6 +234,12 @@ def handle_resign(data):
     loser_sid = players[loser_color]
     winner_sid = players[winner_color]
 
+    
+    defeat(loser_sid, winner_sid, room_id)
+    
+
+
+def defeat(loser_sid, winner_sid, room_id) :
     emit("resigned", {"result": "lose"}, to=loser_sid)
 
     emit("resigned", {"result": "win"}, to=winner_sid)
