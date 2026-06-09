@@ -49,7 +49,7 @@ def handle_request_match():
         f"소켓ID: {current_sid} | "
         f"현재 큐 인원: {len(match_queue)}명"
     )
-    Timer(3, timeout_match, args=[current_sid]).start()
+    Timer(60, timeout_match, args=[current_sid]).start()
 
     if len(match_queue) >= 2:
         player1 = match_queue.pop(0)
